@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>腸道年齡評估問卷</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #5D5CDE;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #5D5CDE;
+            cursor: pointer;
+        }
+
+        .dark input[type="range"] {
+            background: #4a5568;
+        }
+
+        .panel-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-box {
+            transition: all 0.5s ease;
+        }
+        
+        .problem-card {
+            transition: all 0.3s ease;
+        }
+        
+        .problem-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .shiny-gold {
+            background: linear-gradient(45deg, #FFD700, #FFA500, #FFD700, #FFA500);
+            background-size: 200% 200%;
+            animation: shine 2s linear infinite;
+        }
+        
+        @keyframes shine {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        .social-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .social-btn:hover {
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-primary mb-2">腸道年齡評估問卷</h1>
+            <p class="text-gray-600 dark:text-gray-400">本問卷基於飲食、生活習慣及腸道症狀評估「腸道年齡」，僅供參考，非醫學診斷。若有健康疑慮，請諮詢專業醫療人員。</p>
+        </header>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 transition-all duration-300">
+            <h2 class="text-xl font-semibold mb-4 text-primary">基本資料</h2>
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="age" class="block text-gray-700 dark:text-gray-300 mb-2">實際年齡 (歲)</label>
+                        <input type="number" id="age" min="1" max="120" class="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" required>
+                    </div>
+                    <div>
+                        <label for="height" class="block text-gray-700 dark:text-gray-300 mb-2">身高 (厘米)</label>
+                        <input type="number" id="height" min="50" max="250" class="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" required>
+                    </div>
+                    <div>
+                        <label for="weight" class="block text-gray-700 dark:text-gray-300 mb-2">體重 (公斤)</label>
+                        <input type="number" id="weight" min="20" max="250" step="0.1" class="w-full px-4 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-base" required>
+                    </div>
+                </div>
+                <div class="bmi-result hidden mt-4 p-4 rounded-lg bg-gray-100 dark:bg-gray-700">
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium">BMI 計算結果:</span>
+                        <span id="bmi-value" class="font-bold text-lg">--</span>
+                    </div>
+                    <div class="mt-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-400" id="bmi-category">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="questionnaire" class="space-y-6 mb-6 hidden">
+            <!-- Part 1: Intestinal Health -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 panel-fade-in transition-all duration-300">
+                <h2 class="text-xl font-semibold mb-4 text-primary">第一部分：腸道健康</h2>
+                <div class="space-y-6">
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">1. 排便頻率是否規律？</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">評估您的排便是否按時發生且頻率穩定</p>
+                        <div class="grid grid-cols-5 text-xs mb-1 text-center">
+                            <span>1 - 極不規律<br>(一週<3次/隨機)</span>
+                            <span>2 - 不太規律<br>(頻率不定)</span>
+                            <span>3 - 中等規律<br>(大致固定)</span>
+                            <span>4 - 規律<br>(幾乎每日)</span>
+                            <span>5 - 非常規律<br>(每日固定時間)</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="w-full" id="q1" oninput="updateRangeValue('q1')">
+                        <div class="text-right mt-1">
+                            <span id="q1-value" class="text-sm font-medium">3分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">2. 糞便硬度</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">評估您糞便的質地與形態，理想是形狀成形但柔軟光滑</p>
+                        <div class="grid grid-cols-5 text-xs mb-1 text-center">
+                            <span>1 - 硬球/顆粒<br>(排便困難) - 0分</span>
+                            <span>2 - 較硬成形<br>(略乾) - 2分</span>
+                            <span>3 - 理想軟硬度<br>(香蕉狀) - 5分</span>
+                            <span>4 - 略軟不成形<br>(糊狀) - 2分</span>
+                            <span>5 - 水狀<br>(腹瀉) - 0分</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="w-full" id="q2" oninput="updateRangeValue('q2')">
+                        <div class="text-right mt-1">
+                            <span id="q2-value" class="text-sm font-medium">3分</span>
+                        </div>
+                        <input type="hidden" id="q2-score" value="5">
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">3. 排便後未排淨感</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">排便後是否感覺還有殘便未排出</p>
+                        <div class="grid grid-cols-5 text-xs mb-1 text-center">
+                            <span>1 - 總是<br>(每次排便)</span>
+                            <span>2 - 經常<br>(一週多次)</span>
+                            <span>3 - 偶爾<br>(每月幾次)</span>
+                            <span>4 - 很少<br>(偶發)</span>
+                            <span>5 - 從未<br>(完全排空)</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="w-full" id="q3" oninput="updateRangeValue('q3')">
+                        <div class="text-right mt-1">
+                            <span id="q3-value" class="text-sm font-medium">3分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">4. 糞便顏色異常</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">正常糞便顏色為棕色至黃褐色，黑色、灰白色或鮮紅色可能表示問題</p>
+                        <div class="grid grid-cols-5 text-xs mb-1 text-center">
+                            <span>1 - 常見異常<br>(黑色/紅色)</span>
+                            <span>2 - 時常異常<br>(顏色不穩定)</span>
+                            <span>3 - 偶有異常<br>(偶發變化)</span>
+                            <span>4 - 很少異常<br>(少有變化)</span>
+                            <span>5 - 顏色正常<br>(持續正常棕色)</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="w-full" id="q4" oninput="updateRangeValue('q4')">
+                        <div class="text-right mt-1">
+                            <span id="q4-value" class="text-sm font-medium">3分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">5. 糞便或排氣氣味強烈</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">異常強烈或難聞的氣味可能表示腸道消化不良或失衡</p>
+                        <div class="grid grid-cols-5 text-xs mb-1 text-center">
+                            <span>1 - 總是強烈<br>(異常難聞) - 0分</span>
+                            <span>2 - 經常強烈<br>(有些難聞) - 1分</span>
+                            <span>3 - 中等<br>(一般氣味) - 5分</span>
+                            <span>4 - 很少強烈<br>(輕微氣味) - 4分</span>
+                            <span>5 - 從無強烈<br>(氣味極輕) - 2分</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="w-full" id="q5" oninput="updateRangeValue('q5')">
+                        <div class="text-right mt-1">
+                            <span id="q5-value" class="text-sm font-medium">3分</span>
+                        </div>
+                        <input type="hidden" id="q5-score" value="5">
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">6. 其他腸胃問題頻率</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">腹脹、胃灼熱、胃痛等腸胃不適症狀的頻率</p>
+                        <div class="grid grid-cols-5 text-xs mb-1 text-center">
+                            <span>1 - 幾乎每天<br>(嚴重持續)</span>
+                            <span>2 - 每週多次<br>(頻繁發生)</span>
+                            <span>3 - 每月幾次<br>(偶爾發生)</span>
+                            <span>4 - 極少發生<br>(幾個月一次)</span>
+                            <span>5 - 從不發生<br>(完全無症狀)</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="w-full" id="q6" oninput="updateRangeValue('q6')">
+                        <div class="text-right mt-1">
+                            <span id="q6-value" class="text-sm font-medium">3分</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 2: Diet Evaluation -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 panel-fade-in transition-all duration-300">
+                <h2 class="text-xl font-semibold mb-4 text-primary">第二部分：飲食評分</h2>
+                <div class="space-y-6">
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">1. 每日蔬果攝取量</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">蔬果富含膳食纖維與營養素，對腸道健康至關重要（1份約1碗生菜或1個中型水果）</p>
+                        <div class="grid grid-cols-5 text-xs mb-1 text-center">
+                            <span>1 - 0份<br>(幾乎不吃)</span>
+                            <span>2 - 1-2份<br>(偶爾吃些)</span>
+                            <span>3 - 3份<br>(普通攝取)</span>
+                            <span>4 - 4份<br>(優良攝取)</span>
+                            <span>5 - 5+份<br>(充足攝取)</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="w-full" id="q7" oninput="updateRangeValue('q7')">
+                        <div class="text-right mt-1">
+                            <span id="q7-value" class="text-sm font-medium">3分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">2. 每週外食次數</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">外食通常含有較多油脂、鹽分和添加物，可能影響腸道菌相平衡</p>
+                        <div class="grid grid-cols-5 text-xs mb-1 text-center">
+                            <span>1 - 每日多次<br>(7+次/週)</span>
+                            <span>2 - 每日一次<br>(5-7次/週)</span>
+                            <span>3 - 隔日一次<br>(3-4次/週)</span>
+                            <span>4 - 偶爾<br>(1-2次/週)</span>
+                            <span>5 - 很少外食<br>(0次/週)</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="w-full" id="q8" oninput="updateRangeValue('q8')">
+                        <div class="text-right mt-1">
+                            <span id="q8-value" class="text-sm font-medium">3分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">3. 早餐習慣</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">規律早餐有助於腸胃道功能正常運作與新陳代謝</p>
+                        <div class="grid grid-cols-5 text-xs mb-1 text-center">
+                            <span>1 - 不吃早餐<br>(幾乎不吃)</span>
+                            <span>2 - 偶爾食用<br>(1-2次/週)</span>
+                            <span>3 - 不規律<br>(3-4次/週)</span>
+                            <span>4 - 規律食用<br>(5-6次/週)</span>
+                            <span>5 - 固定充足<br>(每天均衡)</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="w-full" id="q9" oninput="updateRangeValue('q9')">
+                        <div class="text-right mt-1">
+                            <span id="q9-value" class="text-sm font-medium">3分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">4. 含糖飲料/酒精攝取頻率</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">含糖飲料和酒精會破壞腸道菌群平衡，影響消化系統健康</p>
+                        <div class="grid grid-cols-5 text-xs mb-1 text-center">
+                            <span>1 - 大量頻繁<br>(每天多次)</span>
+                            <span>2 - 經常<br>(每天)</span>
+                            <span>3 - 中等<br>(每週幾次)</span>
+                            <span>4 - 偶爾<br>(每月幾次)</span>
+                            <span>5 - 從不<br>(完全不喝)</span>
+                        </div>
+                        <input type="range" min="1" max="5" value="3" class="w-full" id="q10" oninput="updateRangeValue('q10')">
+                        <div class="text-right mt-1">
+                            <span id="q10-value" class="text-sm font-medium">3分</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Part 3: Lifestyle - 細分為更多問題 -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 panel-fade-in transition-all duration-300">
+                <h2 class="text-xl font-semibold mb-4 text-primary">第三部分：生活型態</h2>
+                <div class="space-y-6">
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">1. 睡眠時長</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">足夠的睡眠時間有利於腸道健康和整體免疫系統</p>
+                        <div class="grid grid-cols-3 text-xs mb-1 text-center">
+                            <span>1 - 睡眠不足<br>(<6小時/天)</span>
+                            <span>2 - 睡眠時間一般<br>(6-7小時/天)</span>
+                            <span>3 - 睡眠充足<br>(7-9小時/天)</span>
+                        </div>
+                        <input type="range" min="1" max="3" value="2" class="w-full" id="q11" oninput="updateRangeValue('q11')">
+                        <div class="text-right mt-1">
+                            <span id="q11-value" class="text-sm font-medium">2分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">2. 入睡難易度</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">評估入睡所需時間及入睡困難頻率</p>
+                        <div class="grid grid-cols-3 text-xs mb-1 text-center">
+                            <span>1 - 經常難以入睡<br>(>30分鐘/頻繁失眠)</span>
+                            <span>2 - 有時難以入睡<br>(15-30分鐘/偶爾失眠)</span>
+                            <span>3 - 容易入睡<br>(<15分鐘/很少失眠)</span>
+                        </div>
+                        <input type="range" min="1" max="3" value="2" class="w-full" id="q12" oninput="updateRangeValue('q12')">
+                        <div class="text-right mt-1">
+                            <span id="q12-value" class="text-sm font-medium">2分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">3. 睡眠後恢復感</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">睡眠品質影響細胞修復和腸道健康</p>
+                        <div class="grid grid-cols-3 text-xs mb-1 text-center">
+                            <span>1 - 醒來仍感疲倦<br>(無法恢復精力)</span>
+                            <span>2 - 部分恢復<br>(有些精神但非最佳)</span>
+                            <span>3 - 完全恢復<br>(醒來精神充沛)</span>
+                        </div>
+                        <input type="range" min="1" max="3" value="2" class="w-full" id="q13" oninput="updateRangeValue('q13')">
+                        <div class="text-right mt-1">
+                            <span id="q13-value" class="text-sm font-medium">2分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">4. 運動頻率（每次>30分鐘）</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">規律運動促進腸道蠕動和代謝健康</p>
+                        <div class="grid grid-cols-3 text-xs mb-1 text-center">
+                            <span>1 - 很少運動<br>(每月少於2次)</span>
+                            <span>2 - 偶爾運動<br>(每週1-2次)</span>
+                            <span>3 - 規律運動<br>(每週3次以上)</span>
+                        </div>
+                        <input type="range" min="1" max="3" value="2" class="w-full" id="q14" oninput="updateRangeValue('q14')">
+                        <div class="text-right mt-1">
+                            <span id="q14-value" class="text-sm font-medium">2分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">5. 運動能力（肌肉力量）</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">評估是否具備足夠肌肉力量輕鬆進行日常活動和運動</p>
+                        <div class="grid grid-cols-3 text-xs mb-1 text-center">
+                            <span>1 - 容易疲勞<br>(缺乏肌肉力量)</span>
+                            <span>2 - 一般活動沒問題<br>(中等肌肉力量)</span>
+                            <span>3 - 充沛體力<br>(良好肌肉力量)</span>
+                        </div>
+                        <input type="range" min="1" max="3" value="2" class="w-full" id="q15" oninput="updateRangeValue('q15')">
+                        <div class="text-right mt-1">
+                            <span id="q15-value" class="text-sm font-medium">2分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">6. 皮膚狀況</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">腸道健康與皮膚狀態密切相關</p>
+                        <div class="grid grid-cols-3 text-xs mb-1 text-center">
+                            <span>1 - 皮膚問題頻繁<br>(痘痘/乾燥/敏感)</span>
+                            <span>2 - 偶有皮膚問題<br>(間歇性問題)</span>
+                            <span>3 - 皮膚健康<br>(光滑有彈性)</span>
+                        </div>
+                        <input type="range" min="1" max="3" value="2" class="w-full" id="q16" oninput="updateRangeValue('q16')">
+                        <div class="text-right mt-1">
+                            <span id="q16-value" class="text-sm font-medium">2分</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="block text-gray-700 dark:text-gray-300 mb-2">7. 壓力管理</label>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">長期壓力會影響腸道-大腦軸，導致腸道敏感和消化問題</p>
+                        <div class="grid grid-cols-3 text-xs mb-1 text-center">
+                            <span>1 - 長期高壓/焦慮<br>(持續情緒不良)</span>
+                            <span>2 - 中度壓力<br>(偶有不良情緒)</span>
+                            <span>3 - 良好壓力管理<br>(情緒穩定)</span>
+                        </div>
+                        <input type="range" min="1" max="3" value="2" class="w-full" id="q17" oninput="updateRangeValue('q17')">
+                        <div class="text-right mt-1">
+                            <span id="q17-value" class="text-sm font-medium">2分</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button id="start-button" class="bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
+                開始評估
+            </button>
+            <button id="calculate-button" class="hidden bg-primary hover:bg-primary/90 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
+                計算結果
+            </button>
+        </div>
+
+        <div id="result-section" class="mt-8 hidden">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 panel-fade-in transition-all duration-300">
+                <h2 class="text-xl font-semibold mb-4 text-center text-primary">腸道年齡評估結果</h2>
+                
+                <!-- Achievement Badges -->
+                <div id="much-younger-badge" class="hidden text-center mb-4">
+                    <div class="inline-block badge p-3 rounded-full">
+                        <div class="shiny-gold text-white p-4 rounded-full flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="mt-2 font-bold text-yellow-600">卓越成就！您的腸道比實際年齡年輕許多</p>
+                </div>
+                
+                <div id="younger-badge" class="hidden text-center mb-4">
+                    <div class="inline-block badge p-3 rounded-full">
+                        <div class="bg-yellow-500 text-white p-4 rounded-full flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="mt-2 font-bold text-yellow-600">恭喜！您的腸道比實際年齡年輕</p>
+                </div>
+                
+                <div id="similar-badge" class="hidden text-center mb-4">
+                    <div class="inline-block badge p-3 rounded-full">
+                        <div class="bg-blue-500 text-white p-4 rounded-full flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="mt-2 font-bold text-blue-600">腸道健康處於理想範圍</p>
+                </div>
+                
+                <div id="older-badge" class="hidden text-center mb-4">
+                    <div class="inline-block badge p-3 rounded-full">
+                        <div class="bg-red-400 text-white p-4 rounded-full flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="mt-2 font-bold text-red-500">您的腸道有些提前老化</p>
+                </div>
+                
+                <div id="significantly-older-badge" class="hidden text-center mb-4">
+                    <div class="inline-block badge p-3 rounded-full">
+                        <div class="bg-red-700 text-white p-4 rounded-full flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <p class="mt-2 font-bold text-red-700">腸道顯著老化，需要立即關注</p>
+                </div>
+                
+                <div class="text-center mb-6">
+                    <div class="text-4xl font-bold mb-2">
+                        <span id="real-age">--</span> <span class="text-2xl">歲</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">實際年齡</p>
+                </div>
+                
+                <div class="flex items-center justify-center mb-6">
+                    <div class="h-12 w-12 flex items-center justify-center rounded-full bg-primary text-white text-2xl font-bold">
+                        VS
+                    </div>
+                </div>
+                
+                <div class="text-center mb-6">
+                    <div class="text-4xl font-bold mb-2 text-primary">
+                        <span id="intestinal-age">--</span> <span class="text-2xl">歲</span>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-400">腸道年齡</p>
+                </div>
+                
+                <div class="text-center mb-6">
+                    <div class="inline-block px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700">
+                        <span class="font-semibold">相差</span>
+                        <span id="age-difference" class="font-bold ml-2">±0</span>
+                        <span class="ml-1">歲</span>
+                    </div>
+                </div>
+                
+                <div id="interpretation" class="mt-6 p-4 rounded-lg bg-gray-100 dark:bg-gray-700 text-center">
+                    <p class="text-lg font-medium" id="interpretation-text">--</p>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="font-semibold mb-2">問卷得分</h3>
+                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded">
+                            <div class="flex justify-between">
+                                <span>總分:</span>
+                                <span id="total-score" class="font-bold">--/71</span>
+                            </div>
+                            <div class="flex justify-between mt-1">
+                                <span>腸道健康評級:</span>
+                                <span id="gut-health-level" class="font-medium">--</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">BMI評估</h3>
+                        <div class="p-3 bg-gray-100 dark:bg-gray-700 rounded">
+                            <div class="flex justify-between">
+                                <span>BMI值:</span>
+                                <span id="result-bmi" class="font-bold">--</span>
+                            </div>
+                            <div class="flex justify-between mt-1">
+                                <span>BMI調整值:</span>
+                                <span id="bmi-weight" class="font-medium">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product Recommendations -->
+            <div id="recommendations-section" class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 panel-fade-in">
+                <h2 class="text-xl font-semibold mb-6 text-center text-primary">個人化保健建議</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Gut Health Product -->
+                    <div id="gut-product" class="problem-card bg-white dark:bg-gray-700 rounded-lg shadow p-4 border-l-4 border-orange-500 hidden">
+                        <h3 class="font-bold text-lg mb-2">腸道健康問題</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3" id="gut-issue-desc">您的腸道健康指標低於理想狀態，可能出現消化不良、脹氣或排便不規律等問題。</p>
+                        <a href="https://hskgene.com/products/probiolife-probiotics" target="_blank" class="block text-center bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-lg transition-colors">
+                            查看 金裝益纖菌 Probiotics Gold
+                        </a>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">含100億美國星級益生菌，幫助平衡腸道菌群，改善腸道蠕動，緩解便秘和腸胃不適。</p>
+                    </div>
+                    
+                    <!-- Mood & Sleep Product -->
+                    <div id="mood-product" class="problem-card bg-white dark:bg-gray-700 rounded-lg shadow p-4 border-l-4 border-purple-500 hidden">
+                        <h3 class="font-bold text-lg mb-2">情緒與睡眠問題</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3" id="mood-issue-desc">您的壓力管理和睡眠品質評分較低，可能影響腸道-大腦軸的正常功能。</p>
+                        <a href="https://hskgene.com/products/probiolife-lpc37" target="_blank" class="block text-center bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg transition-colors">
+                            查看 益緒寧 情緒益生菌
+                        </a>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">每包含不少於170億情緒益生菌，幫助紓壓放鬆，改善睡眠質量，維持心情愉悅。</p>
+                    </div>
+                    
+                    <!-- Skin Product -->
+                    <div id="skin-product" class="problem-card bg-white dark:bg-gray-700 rounded-lg shadow p-4 border-l-4 border-blue-500 hidden">
+                        <h3 class="font-bold text-lg mb-2">皮膚健康問題</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3" id="skin-issue-desc">您的皮膚狀態評分較低，腸道與皮膚健康息息相關，改善腸道菌相可能有助於皮膚問題。</p>
+                        <a href="https://hskgene.com/products/prohealth_s-acetyl-glutathione" target="_blank" class="block text-center bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors">
+                            查看 ProHealth S-乙酰穀胱甘肽
+                        </a>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">含天然高效抗氧化活性，有助美白肌膚、阻止黑色素形成，維持健康細胞功能。</p>
+                    </div>
+                    
+                    <!-- Exercise Product -->
+                    <div id="exercise-product" class="problem-card bg-white dark:bg-gray-700 rounded-lg shadow p-4 border-l-4 border-green-500 hidden">
+                        <h3 class="font-bold text-lg mb-2">運動與代謝問題</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3" id="exercise-issue-desc">您的運動頻率評分較低，增加適當運動有助於促進腸道蠕動與代謝功能。</p>
+                        <a href="https://hskgene.com/products/probiolife-slim-protein-familypack" target="_blank" class="block text-center bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors">
+                            查看 益纖蛋白
+                        </a>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">全港首創益纖蛋白雙效科研配方，含優質大豆蛋白和益生菌，幫助達到結實纖瘦的健康體態。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-6 mb-4">
+                <button id="restart-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300">
+                    重新開始
+                </button>
+            </div>
+            
+            <!-- Social Links -->
+            <div class="flex flex-wrap justify-center gap-4 mt-6">
+                <a href="https://wa.me/57023008" target="_blank" class="social-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                    </svg>
+                    WhatsApp諮詢
+                </a>
+                
+                <a href="https://www.facebook.com/probiolife.first" target="_blank" class="social-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                    追蹤Facebook
+                </a>
+                
+                <a href="https://hskgene.com/" target="_blank" class="social-btn bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-lg flex items-center shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    登記領取試用裝
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check for dark mode preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        // Initialize UI elements
+        const startButton = document.getElementById('start-button');
+        const calculateButton = document.getElementById('calculate-button');
+        const questionnaire = document.getElementById('questionnaire');
+        const resultSection = document.getElementById('result-section');
+        const restartButton = document.getElementById('restart-button');
+        
+        // Badge elements
+        const muchYoungerBadge = document.getElementById('much-younger-badge');
+        const youngerBadge = document.getElementById('younger-badge');
+        const similarBadge = document.getElementById('similar-badge');
+        const olderBadge = document.getElementById('older-badge');
+        const significantlyOlderBadge = document.getElementById('significantly-older-badge');
+        
+        // Input fields
+        const ageInput = document.getElementById('age');
+        const heightInput = document.getElementById('height');
+        const weightInput = document.getElementById('weight');
+        const bmiResult = document.querySelector('.bmi-result');
+        const bmiValue = document.getElementById('bmi-value');
+        const bmiCategory = document.getElementById('bmi-category');
+        
+        // Result fields
+        const realAgeElem = document.getElementById('real-age');
+        const intestinalAgeElem = document.getElementById('intestinal-age');
+        const ageDifferenceElem = document.getElementById('age-difference');
+        const interpretationText = document.getElementById('interpretation-text');
+        const totalScoreElem = document.getElementById('total-score');
+        const gutHealthLevelElem = document.getElementById('gut-health-level');
+        const resultBmiElem = document.getElementById('result-bmi');
+        const bmiWeightElem = document.getElementById('bmi-weight');
+        
+        // Product recommendation sections
+        const gutProduct = document.getElementById('gut-product');
+        const moodProduct = document.getElementById('mood-product');
+        const skinProduct = document.getElementById('skin-product');
+        const exerciseProduct = document.getElementById('exercise-product');
+        const gutIssueDesc = document.getElementById('gut-issue-desc');
+        const moodIssueDesc = document.getElementById('mood-issue-desc');
+        const skinIssueDesc = document.getElementById('skin-issue-desc');
+        const exerciseIssueDesc = document.getElementById('exercise-issue-desc');
+        
+        // Update range value display
+        function updateRangeValue(id) {
+            const slider = document.getElementById(id);
+            const valueDisplay = document.getElementById(`${id}-value`);
+            valueDisplay.textContent = `${slider.value}分`;
+            
+            // Update hidden score values for special questions
+            if (id === 'q2') {
+                const scoreInput = document.getElementById('q2-score');
+                const val = parseInt(slider.value);
+                
+                if (val === 1) scoreInput.value = 0;
+                else if (val === 2) scoreInput.value = 2;
+                else if (val === 3) scoreInput.value = 5;
+                else if (val === 4) scoreInput.value = 2;
+                else if (val === 5) scoreInput.value = 0;
+            }
+            
+            if (id === 'q5') {
+                const scoreInput = document.getElementById('q5-score');
+                const val = parseInt(slider.value);
+                
+                if (val === 1) scoreInput.value = 0;
+                else if (val === 2) scoreInput.value = 1;
+                else if (val === 3) scoreInput.value = 5;
+                else if (val === 4) scoreInput.value = 4;
+                else if (val === 5) scoreInput.value = 2;
+            }
+        }
+        
+        // Calculate BMI
+        function calculateBMI() {
+            const height = parseFloat(heightInput.value);
+            const weight = parseFloat(weightInput.value);
+            
+            if (height && weight && height > 0 && weight > 0) {
+                const heightInMeters = height / 100;
+                const bmi = weight / (heightInMeters * heightInMeters);
+                bmiValue.textContent = bmi.toFixed(1);
+                
+                // Determine BMI category
+                let category = '';
+                if (bmi < 18.5) {
+                    category = '體重過輕';
+                } else if (bmi >= 18.5 && bmi < 24) {
+                    category = '正常範圍';
+                } else if (bmi >= 24 && bmi < 27) {
+                    category = '過重';
+                } else if (bmi >= 27 && bmi < 30) {
+                    category = '輕度肥胖';
+                } else if (bmi >= 30 && bmi < 35) {
+                    category = '中度肥胖';
+                } else {
+                    category = '重度肥胖';
+                }
+                
+                bmiCategory.textContent = category;
+                bmiResult.classList.remove('hidden');
+                return bmi;
+            }
+            
+            bmiResult.classList.add('hidden');
+            return null;
+        }
+        
+        // Get BMI weight
+        function getBmiWeight(bmi) {
+            if (bmi < 18.5) return 1; // 過輕
+            if (bmi >= 18.5 && bmi < 25) return 0; // 正常
+            if (bmi >= 25 && bmi < 30) return 2; // 過重
+            return 3; // 肥胖
+        }
+        
+        // Identify health issues - updated to show recommendations for any detected issue
+        function identifyHealthIssues() {
+            // Reset all product sections
+            gutProduct.classList.add('hidden');
+            moodProduct.classList.add('hidden');
+            skinProduct.classList.add('hidden');
+            exerciseProduct.classList.add('hidden');
+            
+            // Gut Health (questions 1-6)
+            let gutScore = parseInt(document.getElementById('q1').value) + 
+                          parseInt(document.getElementById('q3').value) +
+                          parseInt(document.getElementById('q4').value) +
+                          parseInt(document.getElementById('q6').value);
+            
+            // Add special scores for q2 and q5
+            gutScore += parseInt(document.getElementById('q2-score').value);
+            gutScore += parseInt(document.getElementById('q5-score').value);
+            
+            const maxGutScore = 30; // 6 questions, max 5 points each
+            // Show recommendation if score is less than perfect (more aggressive recommendation)
+            if (gutScore < maxGutScore) {
+                gutProduct.classList.remove('hidden');
+                if (gutScore < maxGutScore * 0.6) { // Less than 60% of max score
+                    gutIssueDesc.textContent = "您的腸道健康指標明顯偏低，可能有腸道菌相失衡、消化吸收障礙等問題。建議補充益生菌，改善腸道環境。";
+                } else {
+                    gutIssueDesc.textContent = "您的腸道健康有提升空間，可能偶爾出現腹脹、排便不規律等症狀。補充益生菌有助於平衡腸道菌群，維持健康狀態。";
+                }
+            }
+            
+            // Mood & Sleep (questions 11-13, 17 - sleep duration, ease to sleep, recovery feeling, stress)
+            const moodScore = parseInt(document.getElementById('q11').value) + 
+                             parseInt(document.getElementById('q12').value) +
+                             parseInt(document.getElementById('q13').value) +
+                             parseInt(document.getElementById('q17').value);
+            
+            const maxMoodScore = 12; // 4 questions, max 3 points each
+            // Show recommendation if score is less than perfect
+            if (moodScore < maxMoodScore) {
+                moodProduct.classList.remove('hidden');
+                if (moodScore < maxMoodScore * 0.6) { // Less than 60% of max score
+                    moodIssueDesc.textContent = "您的睡眠品質與壓力管理狀況較差，可能嚴重影響腸道-大腦軸功能，導致情緒波動和睡眠問題。";
+                } else {
+                    moodIssueDesc.textContent = "您的睡眠品質或壓力管理可以進一步優化，情緒益生菌有助於調節腸腦軸功能，改善睡眠與情緒。";
+                }
+            }
+            
+            // Skin Health (question 16)
+            const skinScore = parseInt(document.getElementById('q16').value);
+            
+            // Show recommendation even with moderate scores
+            if (skinScore < 3) { // Less than perfect
+                skinProduct.classList.remove('hidden');
+                if (skinScore < 2) {
+                    skinIssueDesc.textContent = "您的皮膚狀態評分較低，抗氧化營養補充有助於改善皮膚健康，減少氧化壓力對皮膚的損害。";
+                } else {
+                    skinIssueDesc.textContent = "您的皮膚狀況可以更好，適當的抗氧化補充有助於提升皮膚健康和光澤，減少肌膚衰老。";
+                }
+            }
+            
+            // Exercise (questions 14 and 15 - frequency and muscle strength)
+            const exerciseScore = parseInt(document.getElementById('q14').value) + 
+                                parseInt(document.getElementById('q15').value);
+            
+            const maxExerciseScore = 6; // 2 questions, max 3 points each
+            // Show recommendation if score is less than perfect
+            if (exerciseScore < maxExerciseScore) {
+                exerciseProduct.classList.remove('hidden');
+                if (exerciseScore < maxExerciseScore * 0.5) { // Less than 50% of max score
+                    exerciseIssueDesc.textContent = "您的運動習慣和肌肉力量較弱，優質蛋白質補充可幫助提升代謝、促進肌肉生長，改善整體健康。";
+                } else {
+                    exerciseIssueDesc.textContent = "適當增加運動頻率和強度有助於促進腸道蠕動與肌肉發展，優質蛋白質補充可以提升運動效果和維持肌肉健康。";
+                }
+            }
+        }
+        
+        // Hide all badges
+        function hideAllBadges() {
+            muchYoungerBadge.classList.add('hidden');
+            youngerBadge.classList.add('hidden');
+            similarBadge.classList.add('hidden');
+            olderBadge.classList.add('hidden');
+            significantlyOlderBadge.classList.add('hidden');
+        }
+        
+        // Calculate intestinal age
+        function calculateIntestinalAge() {
+            // Get actual age
+            const actualAge = parseInt(ageInput.value);
+            
+            // Calculate BMI
+            const bmi = calculateBMI();
+            const bmiWeight = getBmiWeight(bmi);
+            
+            // Calculate total score with special scoring for q2 and q5
+            let totalScore = 0;
+            
+            // Questions 1, 3, 4, 6
+            totalScore += parseInt(document.getElementById('q1').value);
+            totalScore += parseInt(document.getElementById('q3').value);
+            totalScore += parseInt(document.getElementById('q4').value);
+            totalScore += parseInt(document.getElementById('q6').value);
+            
+            // Special scoring for q2 and q5
+            totalScore += parseInt(document.getElementById('q2-score').value);
+            totalScore += parseInt(document.getElementById('q5-score').value);
+            
+            // Questions 7-17
+            for (let i = 7; i <= 17; i++) {
+                totalScore += parseInt(document.getElementById(`q${i}`).value);
+            }
+            
+            // Calculate score percentage and scale to 11-71 range
+            const maxPossibleScore = 71; // Adjusted to match the new scale with added question
+            totalScoreElem.textContent = `${totalScore}/${maxPossibleScore}`;
+            
+            // Determine gut health level and age adjustment based on total score
+            // Making it easier to get a reduction in age and get a bigger reduction
+            let gutHealthLevel = "";
+            let ageAdjustment = 0;
+            
+            if (totalScore <= 34) {
+                gutHealthLevel = "腸道明顯老化";
+                // Worse score gives older gut (3 to 12 years older) - reduced from 5-15
+                const rangePos = (34 - totalScore) / 34; // Position in range 0-1
+                ageAdjustment = 3 + (rangePos * 9); // Scale to 3-12 years
+            } else if (totalScore <= 50) {
+                gutHealthLevel = "腸道略有老化";
+                // Moderate score gives slightly older gut (0 to 3 years older) - reduced from 1-5
+                const rangePos = (50 - totalScore) / 20; // Position in range 0-1
+                ageAdjustment = 0 + (rangePos * 3); // Scale to 0-3 years
+            } else if (totalScore <= 60) {
+                gutHealthLevel = "腸道健康正常";
+                // Good score gives younger gut (0 to -5 years) - increased from -1 to +1
+                const rangePos = (totalScore - 50) / 15; // Position in range 0-1
+                ageAdjustment = 0 - (rangePos * 5); // Scale from 0 to -5 years
+            } else {
+                gutHealthLevel = "腸道年輕有活力";
+                // Excellent score gives much younger gut (-5 to -15 years) - increased from -1 to -10
+                const rangePos = (totalScore - 60) / 20; // Position in range 0-1
+                ageAdjustment = -5 - (rangePos * 10); // Scale to -5 to -15 years
+            }
+            
+            // Final intestinal age = actual age + adjustment + BMI weight
+            const intestinalAge = actualAge + ageAdjustment + bmiWeight;
+            
+            // Update result display
+            realAgeElem.textContent = actualAge;
+            intestinalAgeElem.textContent = intestinalAge.toFixed(1);
+            gutHealthLevelElem.textContent = gutHealthLevel;
+            
+            // Calculate age difference
+            const ageDifference = intestinalAge - actualAge;
+            const diffText = ageDifference >= 0 ? 
+                `+${ageDifference.toFixed(1)}` : 
+                ageDifference.toFixed(1);
+            ageDifferenceElem.textContent = diffText;
+            
+            // Hide all badges first
+            hideAllBadges();
+            
+            // Set interpretation text and show appropriate badge
+            let interpretation = '';
+            if (ageDifference > 5) {
+                interpretation = '腸道嚴重老化，建議尋求專業諮詢';
+                ageDifferenceElem.className = 'font-bold ml-2 text-red-700';
+                significantlyOlderBadge.classList.remove('hidden');
+            } else if (ageDifference > 2) { // Changed from > 0 to > 2
+                interpretation = '腸道略顯老化，建議調整生活型態';
+                ageDifferenceElem.className = 'font-bold ml-2 text-red-500';
+                olderBadge.classList.remove('hidden');
+            } else if (ageDifference >= -2 && ageDifference <= 2) { // Changed from -1/+1 to -2/+2
+                interpretation = '腸道健康符合年齡基準值';
+                ageDifferenceElem.className = 'font-bold ml-2 text-blue-500';
+                similarBadge.classList.remove('hidden');
+            } else if (ageDifference >= -10) {
+                interpretation = '腸道比實際年齡年輕，維持良好習慣';
+                ageDifferenceElem.className = 'font-bold ml-2 text-yellow-500';
+                youngerBadge.classList.remove('hidden');
+            } else {
+                interpretation = '腸道非常健康，繼續保持良好習慣';
+                ageDifferenceElem.className = 'font-bold ml-2 text-yellow-600';
+                muchYoungerBadge.classList.remove('hidden');
+            }
+            
+            interpretationText.textContent = interpretation;
+            
+            // Update BMI details
+            resultBmiElem.textContent = bmi.toFixed(1);
+            bmiWeightElem.textContent = `${bmiWeight >= 0 ? '+' : ''}${bmiWeight}歲`;
+            
+            // Identify health issues and recommend products
+            identifyHealthIssues();
+            
+            // Show result section
+            resultSection.classList.remove('hidden');
+            calculateButton.classList.add('hidden');
+        }
+        
+        // Event listeners
+        startButton.addEventListener('click', () => {
+            const age = ageInput.value;
+            const height = heightInput.value;
+            const weight = weightInput.value;
+            
+            if (!age || !height || !weight) {
+                alert('請填寫所有基本資料');
+                return;
+            }
+            
+            startButton.classList.add('hidden');
+            questionnaire.classList.remove('hidden');
+            calculateButton.classList.remove('hidden');
+            
+            // Calculate BMI
+            calculateBMI();
+        });
+        
+        calculateButton.addEventListener('click', calculateIntestinalAge);
+        
+        restartButton.addEventListener('click', () => {
+            // Reset all form values
+            document.querySelectorAll('input[type="range"]').forEach(input => {
+                if (input.id.startsWith('q') && parseInt(input.id.substring(1)) <= 10) {
+                    input.value = 3;
+                } else if (input.id.startsWith('q')) {
+                    input.value = 2;
+                }
+                updateRangeValue(input.id);
+            });
+            
+            ageInput.value = '';
+            heightInput.value = '';
+            weightInput.value = '';
+            bmiResult.classList.add('hidden');
+            
+            // Reset UI state
+            resultSection.classList.add('hidden');
+            questionnaire.classList.add('hidden');
+            startButton.classList.remove('hidden');
+            
+            // Hide all badges
+            hideAllBadges();
+        });
+        
+        // Automatically calculate BMI when inputs change
+        heightInput.addEventListener('input', calculateBMI);
+        weightInput.addEventListener('input', calculateBMI);
+        
+        // Initialize range value displays
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            updateRangeValue(input.id);
+        });
+    </script>
+</body>
+</html>
