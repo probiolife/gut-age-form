@@ -1010,7 +1010,20 @@ fetch("https://script.google.com/macros/s/AKfycbykOHSQz4kb_5Hv2jagqXH8Xex4tBsWDk
         });
         
         calculateButton.addEventListener('click', calculateIntestinalAge);
-        
+        const data = {
+  name: document.querySelector("#name").value,
+  age: document.querySelector("#age").value,
+  score: totalScore,
+  bmi: bmiValue,
+  result: resultText
+};
+
+fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec", {
+  method: "POST",
+  headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  body: new URLSearchParams(data)
+});
+
         restartButton.addEventListener('click', () => {
             // Reset all form values
             document.querySelectorAll('input[type="range"]').forEach(input => {
